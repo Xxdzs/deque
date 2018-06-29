@@ -23,5 +23,10 @@ unsigned			DEQUE_interior(deque* self);
 unsigned			DEQUE_exterior(deque* self);
 /* Returns -1 if out of bound, -2 if outside storage */
 int					DEQUE_index(deque* self, void* element);
+/* Move the specified pointer to the next/previous element */
+void				DEQUE_move_one(deque* self, void** pointer, bool forward);
+
+# define DEQUE_move_forward_one(SELF, PTR) DEQUE_move_one(SELF, &PTR, true)
+# define DEQUE_move_backward_one(SELF, PTR) DEQUE_move_one(SELF, &PTR, false)
 
 #endif /* DEQUE_PRIVATE_H */

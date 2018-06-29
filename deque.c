@@ -39,11 +39,13 @@ bool        DEQUE_intent(deque* self, char intent)
 
 void*		DEQUE_first(deque* self)
 {
-	return (self->front);
+	return (DEQUE_is_empty(self) ? NULL : self->front);
 }
 
 void*		DEQUE_last(deque* self)
 {
+	if (DEQUE_is_empty(self))
+		return (NULL);
 	return (((self->back == DEQUE_begin(self)) ? DEQUE_end(self) : self->back)
 			- DEQUE_offset(self, 1));
 }
@@ -65,18 +67,18 @@ bool		DEQUE_is_empty(deque* self)
 
 bool		DEQUE_is_full(deque* self)
 {
-	return (DEQUE_distance(self, self->front, self->back)
-			== (DEQUE_is_split(self) ? 1 : DEQUE_max(self)));
+	return (DEQUE_size(self) == DEQUE_max(self));
 }
 
-bool		DEQUE_push_front_one(deque* self, void* element)
+bool		DEQUE_push_one(deque* self, void* element, bool front)
 {
-	if (DEQUE_size(self) == DEQUE_max(self))
+	if (DEQUE_is_full(self))
 		return (false);
-	if (self->front == DEQUE_begin(self))
-		self->front = DEQUE_end(self);
-	self->front -= DEQUE_offset(self, 1);
-	memcpy(self->front, element, DEQUE_offset(self, 1));
+	if (front)
+		DEQUE_move_backward_one(self, self->front);
+	memcpy(front ? self->front : self->back, element, DEQUE_offset(self, 1));
+	if (!front)
+		DEQUE_move_forward_one(self, self->back);
 	return (true);
 }
 
@@ -89,17 +91,6 @@ bool		DEQUE_push_front(deque* self, void* elements, unsigned count)
 		DEQUE_push_front_one(self, elements);
 		elements += DEQUE_offset(self, 1);
 	}
-	return (true);
-}
-
-bool		DEQUE_push_back_one(deque* self, void* element)
-{
-	if (DEQUE_size(self) == DEQUE_max(self))
-		return (false);
-	memcpy(self->back, element, DEQUE_offset(self, 1));
-	self->back += DEQUE_offset(self, 1);
-	if (self->back == DEQUE_end(self))
-		self->back = DEQUE_begin(self);
 	return (true);
 }
 
@@ -116,6 +107,35 @@ bool		DEQUE_push_back(deque* self, void* elements, unsigned count)
 	{
 		self->back = DEQUE_begin(self);
 		DEQUE_push_back(self, elements + DEQUE_offset(self, first), count - first);
+	}
+	return (true);
+}
+
+bool		DEQUE_pop_one(deque* self, void* destination, bool front)
+{
+	if (DEQUE_is_empty(self))
+		return (false);
+	if (!front)
+		DEQUE_move_backward_one(self, self->back);
+	memcpy(destination, front ? self->front : self->back, DEQUE_offset(self, 1));
+	if (front)
+		DEQUE_move_forward_one(self, self->front);
+	return (true);
+}
+
+bool		DEQUE_pop_front(deque* self, void* destination, unsigned count)
+{
+	unsigned		first;
+
+	if (DEQUE_size(self) < count)
+		return (false);
+	first = MIN(count, DEQUE_distance(self, DEQUE_end(self), self->front));
+	memcpy(destination, self->front, DEQUE_offset(self, first));
+	self->front += DEQUE_offset(self, first);
+	if (self->front == DEQUE_end(self))
+	{
+		self->front = DEQUE_begin(self);
+		DEQUE_pop_front(self, destination + DEQUE_offset(self, first), count - first);
 	}
 	return (true);
 }

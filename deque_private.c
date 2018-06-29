@@ -56,3 +56,12 @@ int			DEQUE_index(deque* self, void* element)
 		return (DEQUE_size(self) - DEQUE_distance(self, element, self->back));
 	return (-1);
 }
+
+void		DEQUE_move_one(deque* self, void** pointer, bool forward)
+{
+	if (!forward && *pointer == DEQUE_begin(self))
+		*pointer = DEQUE_end(self);
+	*pointer += self->type_size * (forward ? 1 : -1);
+	if (forward && *pointer == DEQUE_end(self))
+		*pointer = DEQUE_begin(self);
+}

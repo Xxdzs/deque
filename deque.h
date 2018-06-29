@@ -21,7 +21,7 @@ struct              s_deque
 };
 
 /* This constructor can be used if the storage is a C static array */
-# define DEQUE_NEW(ARRAY) DEQUE_new(ARRAY, sizeof(*ARRAY), ARRAY_LENGTH(ARRAY))
+# define DEQUE_NEW(ARRAY) (deque){ARRAY, ARRAY, ARRAY, sizeof(*ARRAY), ARRAY_LENGTH(ARRAY)}
 
 /* Returns an initialized deque that uses the specified storage */
 deque				DEQUE_new(void* data, size_t type_size, unsigned capacity);
@@ -39,9 +39,17 @@ unsigned			DEQUE_max(deque* self);
 bool				DEQUE_is_empty(deque* self);
 bool				DEQUE_is_full(deque* self);
 
-bool				DEQUE_push_back(deque* self, void* elements, unsigned count);
+bool				DEQUE_push_one(deque* self, void* element, bool front);
 bool				DEQUE_push_front(deque* self, void* elements, unsigned count);
-bool				DEQUE_push_back_one(deque* self, void* element);
-bool				DEQUE_push_front_one(deque* self, void* element);
+bool				DEQUE_push_back(deque* self, void* elements, unsigned count);
+
+bool				DEQUE_pop_one(deque* self, void* destination, bool front);
+bool				DEQUE_pop_front(deque* self, void* destination, unsigned count);
+
+# define DEQUE_push_front_one(SELF, ELEMENT) DEQUE_push_one(SELF, ELEMENT, true)
+# define DEQUE_push_back_one(SELF, ELEMENT) DEQUE_push_one(SELF, ELEMENT, false)
+
+# define DEQUE_pop_front_one(SELF, DESTINATION) DEQUE_pop_one(SELF, DESTINATION, true)
+# define DEQUE_pop_back_one(SELF, DESTINATION) DEQUE_pop_one(SELF, DESTINATION, false)
 
 #endif /* DEQUE */
